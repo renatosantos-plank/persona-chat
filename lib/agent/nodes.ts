@@ -1,6 +1,6 @@
 import { AIMessage } from "@langchain/core/messages";
 import { chatPrompt, model } from "./model";
-import { ChatStateType } from "./types";
+import type { ChatStateType } from "./types";
 
 export async function chatNode(
   state: ChatStateType
