@@ -1,29 +1,20 @@
-import { AIMessage } from "@langchain/core/messages";
-import { chatPrompt, model } from "./model";
-import type { ChatStateType } from "./types";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { model, systemPrompt } from "./model";
+import type ChatState from "./types";
 
-export async function chatNode(
-  state: ChatStateType
-): Promise<Partial<ChatStateType>> {
+export async function chatNode(state: typeof ChatState.State) {
   const { messages } = state;
 
   const lastMessage = messages[messages.length - 1];
   const userInput = lastMessage.content as string;
 
-  const formattedMessages = messages
-    .slice(0, -1)
-    .map(
-      (msg) =>
-        `${msg.getType() === "human" ? "User" : "Assistant"}: ${msg.content}`
-    )
-    .join("\n");
+  const messagesWithSystemPrompt = [
+    systemPrompt,
+    ...messages.slice(0, -1),
+    new HumanMessage(userInput),
+  ];
 
-  const formattedPrompt = await chatPrompt.format({
-    messages: formattedMessages,
-    input: userInput,
-  });
-
-  const response = await model.invoke(formattedPrompt);
+  const response = await model.invoke(messagesWithSystemPrompt);
 
   const aiMessage = new AIMessage(response.content as string);
 

@@ -15,5 +15,4 @@ export type FrontendMessage = {
   content: string;
 };
 
-export type ChatStateType = typeof ChatState.State;
 export default ChatState;
