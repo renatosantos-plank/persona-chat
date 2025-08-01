@@ -2,7 +2,7 @@ import { createChatGraph } from "@/lib/agent/graph";
 import { FrontendMessage } from "@/lib/agent/types";
 import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
 
-export const maxDuraction = 30;
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
