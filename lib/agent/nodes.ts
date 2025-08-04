@@ -80,7 +80,6 @@ export async function weatherAgent(state: typeof ChatState.State) {
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_weather") {
-        console.log(toolCall);
         const args = toolCall.args;
         const weatherResult = await fetchWeather.invoke(args);
 
@@ -135,6 +134,7 @@ export async function newsAgent(state: typeof ChatState.State) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_news") {
         const args = toolCall.args;
+
         const newsResult = await fetchNews.invoke(args);
 
         const response = await model.invoke([

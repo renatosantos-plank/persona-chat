@@ -9,6 +9,7 @@ export function createChatGraph() {
     .addNode("news", newsAgent)
     .addEdge(START, "chat")
     .addConditionalEdges("chat", (state) => state.next, {
+      // the third argument represents where goes to depending of the result of the second argument
       weather: "weather",
       news: "news",
       end: END,

@@ -87,7 +87,7 @@ Bloody weather, innit?`;
 
 export const fetchNews = tool(
   async (input: unknown) => {
-    const { category } = input as { category?: string };
+    const { query } = input as { query?: string };
     try {
       const apiKey = process.env.NEWSAPI_API_KEY;
 
@@ -95,15 +95,14 @@ export const fetchNews = tool(
         return "Bloody hell! The news service is having a moment, mate. Can't get the headlines right now.";
       }
 
-      const baseUrl = "https://newsapi.org/v2/top-headlines";
+      const baseUrl = "https://newsapi.org/v2/everything";
       const params = new URLSearchParams({
-        country: "us",
         apiKey: apiKey,
         pageSize: "5", // Limit to 5 headlines
       });
 
-      if (category) {
-        params.set("category", category);
+      if (query) {
+        params.set("q", query);
       }
 
       const response = await fetch(`${baseUrl}?${params}`);
@@ -134,9 +133,10 @@ Bloody interesting times we're living in, innit?`;
   },
   {
     name: "fetch_news",
-    description: "Fetch the latest top news headlines from around the world",
+    description:
+      "Fetch the latest top news headlines from a given topic (query)",
     schema: z.object({
-      category: z
+      query: z
         .string()
         .optional()
         .describe(
