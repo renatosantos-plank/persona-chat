@@ -1,15 +1,14 @@
-import { Annotation, END } from "@langchain/langgraph";
-import type { BaseMessage } from "@langchain/core/messages";
+import { Annotation, END, MessagesAnnotation } from "@langchain/langgraph";
 
 export const ChatState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (state: BaseMessage[], update: BaseMessage[]) =>
-      state.concat(update),
-    default: () => [],
-  }),
+  ...MessagesAnnotation.spec,
   next: Annotation<string>({
     reducer: (state, update) => update ?? state ?? END,
     default: () => END,
+  }),
+  summary: Annotation<string>({
+    reducer: (_, update) => update,
+    default: () => "",
   }),
 });
 

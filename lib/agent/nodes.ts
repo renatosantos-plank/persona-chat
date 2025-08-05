@@ -1,10 +1,17 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  RemoveMessage,
+  SystemMessage,
+  ToolMessage,
+} from "@langchain/core/messages";
 import { model, systemPrompt } from "./model";
 import type ChatState from "./types";
 import { fetchNews, fetchWeather } from "./tools";
+import { v4 as uuidv4 } from "uuid";
 
 // Specialized system prompts for each agent
-const weatherSystemPrompt = new HumanMessage(`
+const weatherSystemPrompt = new SystemMessage(`
 You are the Weather Agent, a specialized AI that handles all weather-related queries. You're still Bat Agent's personality but focused on weather information.
 
 When users ask about weather:
@@ -16,7 +23,7 @@ When users ask about weather:
 Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "innit", etc.
 `);
 
-const newsSystemPrompt = new HumanMessage(`
+const newsSystemPrompt = new SystemMessage(`
 You are the News Agent, a specialized AI that handles all news-related queries. You're still Bat Agent's personality but focused on current events.
 
 When users ask about news:
@@ -29,12 +36,19 @@ Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "inni
 `);
 
 export async function chatNode(state: typeof ChatState.State) {
-  const { messages } = state;
+  const { messages, summary } = state;
   const lastMessage = messages[messages.length - 1];
   const userInput = lastMessage.content as string;
+  const systemMessages = [systemPrompt];
+
+  if (summary) {
+    systemMessages.push(
+      new SystemMessage(`Summary of conversation earlier: ${summary}`)
+    );
+  }
 
   const messagesWithSystemPrompt = [
-    systemPrompt,
+    ...systemMessages,
     ...messages.slice(0, -1),
     new HumanMessage(userInput),
   ];
@@ -70,7 +84,6 @@ export async function weatherAgent(state: typeof ChatState.State) {
   const lastMessage = messages[messages.length - 1];
 
   try {
-    // If the last message is a tool call, execute it
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
@@ -83,15 +96,20 @@ export async function weatherAgent(state: typeof ChatState.State) {
         const args = toolCall.args;
         const weatherResult = await fetchWeather.invoke(args);
 
+        const toolMessage = new ToolMessage({
+          content: weatherResult as string,
+          tool_call_id: toolCall.id,
+        });
+        console.log("toolMessage:", toolMessage);
+
         const response = await model.invoke([
           weatherSystemPrompt,
-          new HumanMessage(
-            `User asked about weather. Here's the data: ${weatherResult}`
-          ),
+          ...messages,
+          toolMessage,
         ]);
 
         return {
-          messages: [response],
+          messages: [toolMessage, response],
           next: "end",
         };
       }
@@ -170,4 +188,50 @@ export async function newsAgent(state: typeof ChatState.State) {
       next: "end",
     };
   }
+}
+
+export async function summarizeConversation(state: typeof ChatState.State) {
+  const { summary, messages } = state;
+
+  const messagesWithoutToolCalls = messages.filter((msg) => {
+    if (msg && typeof msg === "object" && "tool_calls" in msg) {
+      const msgWithTools = msg as { tool_calls?: Array<any> };
+      return !msgWithTools.tool_calls || msgWithTools.tool_calls.length === 0;
+    }
+    return true;
+  });
+
+  let summaryMessage: string;
+
+  if (summary) {
+    //extend summary
+    summaryMessage = `This is summary of the conversation to date: ${summary}\n\nExtend the summary by taking into account he news messages above:`;
+  } else {
+    // create summary
+    summaryMessage = "Create a summary of the conversation above:";
+  }
+
+  const allMessages = [
+    ...messagesWithoutToolCalls,
+    new HumanMessage({
+      id: uuidv4(),
+      content: summaryMessage,
+    }),
+  ];
+
+  const response = await model.invoke(allMessages);
+  console.log("messages: ", messages);
+  console.log("summary: ", response.content);
+  const deleteMessages = messages
+    .slice(0, -2)
+    .map((m) => new RemoveMessage({ id: m.id || "" }));
+
+  if (typeof response.content !== "string") {
+    throw new Error("Expected a string response from the model");
+  }
+  return {
+    messages: deleteMessages,
+    summary: response.content,
+    next: "END",
+  };
 }
