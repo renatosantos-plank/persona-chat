@@ -1,7 +1,14 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  RemoveMessage,
+  SystemMessage,
+  ToolMessage,
+} from "@langchain/core/messages";
 import { model, systemPrompt } from "./model";
 import type ChatState from "./types";
-import { fetchNews, fetchWeather } from "./tools";
+import { fetchWeather, fetchNews } from "./tools";
+import { v4 } from "uuid";
 
 // Specialized system prompts for each agent
 const weatherSystemPrompt = new HumanMessage(`
@@ -29,15 +36,14 @@ Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "inni
 `);
 
 export async function chatNode(state: typeof ChatState.State) {
-  const { messages } = state;
-  const lastMessage = messages[messages.length - 1];
-  const userInput = lastMessage.content as string;
-
-  const messagesWithSystemPrompt = [
-    systemPrompt,
-    ...messages.slice(0, -1),
-    new HumanMessage(userInput),
-  ];
+  const { messages, summary } = state;
+  const systemMessages = [systemPrompt];
+  if (summary) {
+    systemMessages.push(
+      new SystemMessage(`Summary of conversation earlier ${summary}`)
+    );
+  }
+  const messagesWithSystemPrompt = [...systemMessages, ...messages];
 
   const response = await model.invoke(messagesWithSystemPrompt, {
     tools: [fetchWeather, fetchNews],
@@ -70,20 +76,37 @@ export async function weatherAgent(state: typeof ChatState.State) {
   const lastMessage = messages[messages.length - 1];
 
   try {
-    // If the last message is a tool call, execute it
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
+
     if (
       lastMessageWithTools.tool_calls &&
       lastMessageWithTools.tool_calls.length > 0
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_weather") {
-        console.log(toolCall);
-        const args = toolCall.args;
+        let args: Record<string, unknown>;
+        try {
+          args =
+            typeof toolCall.args === "string"
+              ? JSON.parse(toolCall.args)
+              : toolCall.args;
+        } catch (parseError) {
+          console.error("Failed to parse tool args:", parseError);
+          const errorMessage = new AIMessage(
+            "SHARON! Something went wrong parsing the weather request, mate. Can you try asking again?"
+          );
+          return {
+            messages: [errorMessage],
+            next: "end",
+          };
+        }
         const weatherResult = await fetchWeather.invoke(args);
-
+        const toolMessage = new ToolMessage({
+          tool_call_id: toolCall.id,
+          content: weatherResult,
+        });
         const response = await model.invoke([
           weatherSystemPrompt,
           new HumanMessage(
@@ -92,13 +115,12 @@ export async function weatherAgent(state: typeof ChatState.State) {
         ]);
 
         return {
-          messages: [response],
+          messages: [toolMessage, response],
           next: "end",
         };
       }
     }
 
-    // Fallback: try to extract location and get weather
     const response = await model.invoke([weatherSystemPrompt, lastMessage], {
       tools: [fetchWeather],
     });
@@ -121,21 +143,43 @@ export async function weatherAgent(state: typeof ChatState.State) {
 
 export async function newsAgent(state: typeof ChatState.State) {
   const { messages } = state;
+  console.log("==================================> newsAgent\n\n\n");
+  console.log(messages, "\n\n");
   const lastMessage = messages[messages.length - 1];
 
   try {
-    // If the last message is a tool call, execute it
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
+
     if (
       lastMessageWithTools.tool_calls &&
       lastMessageWithTools.tool_calls.length > 0
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_news") {
-        const args = toolCall.args;
+        let args: Record<string, unknown>;
+        try {
+          args =
+            typeof toolCall.args === "string"
+              ? JSON.parse(toolCall.args)
+              : toolCall.args;
+        } catch (parseError) {
+          console.error("Failed to parse tool args:", parseError);
+          const errorMessage = new AIMessage(
+            "Bloody hell! Something went wrong parsing the news request, mate. Can you try asking again?"
+          );
+          return {
+            messages: [errorMessage],
+            next: "end",
+          };
+        }
+
         const newsResult = await fetchNews.invoke(args);
+        const toolMessage = new ToolMessage({
+          tool_call_id: toolCall.id,
+          content: newsResult,
+        });
 
         const response = await model.invoke([
           newsSystemPrompt,
@@ -145,7 +189,7 @@ export async function newsAgent(state: typeof ChatState.State) {
         ]);
 
         return {
-          messages: [response],
+          messages: [toolMessage, response],
           next: "end",
         };
       }
@@ -170,4 +214,39 @@ export async function newsAgent(state: typeof ChatState.State) {
       next: "end",
     };
   }
+}
+
+export async function summarizeConversation(state: typeof ChatState.State) {
+  const { summary, messages, next } = state;
+  console.log(next);
+  // console.log("summarize messages: \n", messages, "\n\n");
+
+  let promptSummaryMessage: string;
+
+  if (summary) {
+    promptSummaryMessage = `This is sumary of the conversation to date ${summary}\n\nExtend the summary by taking into account the new messages above:`;
+  } else {
+    promptSummaryMessage = `Create a summary of the conversation above:`;
+  }
+
+  const allMessages = [
+    ...messages,
+    new HumanMessage({
+      id: v4(),
+      content: promptSummaryMessage,
+    }),
+  ];
+
+  const response = await model.invoke(allMessages);
+
+  const deleteMessages = messages
+    .slice(0, -2)
+    .map((m) => new RemoveMessage({ id: m.id || "" }));
+
+  // console.log("deleteMessages\n", deleteMessages);
+  return {
+    messages: deleteMessages,
+    summary: response.content,
+    next: next,
+  };
 }
