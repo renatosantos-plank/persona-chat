@@ -34,5 +34,5 @@ When you need to use a specialized agent, call the appropriate tool and set the 
 export const model = new ChatOpenAI({
   modelName: "gpt-4o-mini",
   temperature: 0.7,
-  streaming: true,
+  streaming: false, // Disable streaming for LangGraph compatibility
 });

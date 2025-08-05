@@ -1,7 +1,7 @@
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { model, systemPrompt } from "./model";
 import type ChatState from "./types";
-import { fetchNews, fetchWeather } from "./tools";
+import { fetchWeather, fetchNews } from "./tools";
 
 // Specialized system prompts for each agent
 const weatherSystemPrompt = new HumanMessage(`
@@ -30,14 +30,9 @@ Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "inni
 
 export async function chatNode(state: typeof ChatState.State) {
   const { messages } = state;
-  const lastMessage = messages[messages.length - 1];
-  const userInput = lastMessage.content as string;
 
-  const messagesWithSystemPrompt = [
-    systemPrompt,
-    ...messages.slice(0, -1),
-    new HumanMessage(userInput),
-  ];
+  // Include all messages with system prompt
+  const messagesWithSystemPrompt = [systemPrompt, ...messages];
 
   const response = await model.invoke(messagesWithSystemPrompt, {
     tools: [fetchWeather, fetchNews],
@@ -74,13 +69,31 @@ export async function weatherAgent(state: typeof ChatState.State) {
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
+
     if (
       lastMessageWithTools.tool_calls &&
       lastMessageWithTools.tool_calls.length > 0
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_weather") {
-        const args = toolCall.args;
+        // Parse the args properly
+        let args: Record<string, unknown>;
+        try {
+          args =
+            typeof toolCall.args === "string"
+              ? JSON.parse(toolCall.args)
+              : toolCall.args;
+        } catch (parseError) {
+          console.error("Failed to parse tool args:", parseError);
+          const errorMessage = new AIMessage(
+            "SHARON! Something went wrong parsing the weather request, mate. Can you try asking again?"
+          );
+          return {
+            messages: [errorMessage],
+            next: "end",
+          };
+        }
+
         const weatherResult = await fetchWeather.invoke(args);
 
         const response = await model.invoke([
@@ -127,13 +140,30 @@ export async function newsAgent(state: typeof ChatState.State) {
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
+
     if (
       lastMessageWithTools.tool_calls &&
       lastMessageWithTools.tool_calls.length > 0
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_news") {
-        const args = toolCall.args;
+        // Parse the args properly
+        let args: Record<string, unknown>;
+        try {
+          args =
+            typeof toolCall.args === "string"
+              ? JSON.parse(toolCall.args)
+              : toolCall.args;
+        } catch (parseError) {
+          console.error("Failed to parse tool args:", parseError);
+          const errorMessage = new AIMessage(
+            "Bloody hell! Something went wrong parsing the news request, mate. Can you try asking again?"
+          );
+          return {
+            messages: [errorMessage],
+            next: "end",
+          };
+        }
 
         const newsResult = await fetchNews.invoke(args);
 
