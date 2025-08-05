@@ -1,7 +1,14 @@
-import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  RemoveMessage,
+  SystemMessage,
+  ToolMessage,
+} from "@langchain/core/messages";
 import { model, systemPrompt } from "./model";
 import type ChatState from "./types";
 import { fetchWeather, fetchNews } from "./tools";
+import { v4 } from "uuid";
 
 // Specialized system prompts for each agent
 const weatherSystemPrompt = new HumanMessage(`
@@ -29,12 +36,14 @@ Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "inni
 `);
 
 export async function chatNode(state: typeof ChatState.State) {
-  const { messages } = state;
-  console.log("==================================> chatNode\n\n\n");
-  console.log(messages, "\n\n");
-
-  // Include all messages with system prompt
-  const messagesWithSystemPrompt = [systemPrompt, ...messages];
+  const { messages, summary } = state;
+  const systemMessages = [systemPrompt];
+  if (summary) {
+    systemMessages.push(
+      new SystemMessage(`Summary of conversation earlier ${summary}`)
+    );
+  }
+  const messagesWithSystemPrompt = [...systemMessages, ...messages];
 
   const response = await model.invoke(messagesWithSystemPrompt, {
     tools: [fetchWeather, fetchNews],
@@ -205,4 +214,39 @@ export async function newsAgent(state: typeof ChatState.State) {
       next: "end",
     };
   }
+}
+
+export async function summarizeConversation(state: typeof ChatState.State) {
+  const { summary, messages, next } = state;
+  console.log(next);
+  // console.log("summarize messages: \n", messages, "\n\n");
+
+  let promptSummaryMessage: string;
+
+  if (summary) {
+    promptSummaryMessage = `This is sumary of the conversation to date ${summary}\n\nExtend the summary by taking into account the new messages above:`;
+  } else {
+    promptSummaryMessage = `Create a summary of the conversation above:`;
+  }
+
+  const allMessages = [
+    ...messages,
+    new HumanMessage({
+      id: v4(),
+      content: promptSummaryMessage,
+    }),
+  ];
+
+  const response = await model.invoke(allMessages);
+
+  const deleteMessages = messages
+    .slice(0, -2)
+    .map((m) => new RemoveMessage({ id: m.id || "" }));
+
+  // console.log("deleteMessages\n", deleteMessages);
+  return {
+    messages: deleteMessages,
+    summary: response.content,
+    next: next,
+  };
 }

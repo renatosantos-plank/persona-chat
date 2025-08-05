@@ -99,6 +99,7 @@ export const fetchNews = tool(
       const params = new URLSearchParams({
         apiKey: apiKey,
         pageSize: "5", // Limit to 5 headlines
+        q: query || "artificial intelligence",
       });
 
       if (query) {
@@ -106,7 +107,7 @@ export const fetchNews = tool(
       }
 
       const response = await fetch(`${baseUrl}?${params}`);
-
+      console.log(response);
       if (!response.ok) {
         throw new Error(`News API error: ${response.status}`);
       }
