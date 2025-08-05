@@ -1,4 +1,4 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { model, systemPrompt } from "./model";
 import type ChatState from "./types";
 import { fetchWeather, fetchNews } from "./tools";
@@ -30,6 +30,8 @@ Remember: You're still Bat Agent - use phrases like "bloody hell", "mate", "inni
 
 export async function chatNode(state: typeof ChatState.State) {
   const { messages } = state;
+  console.log("==================================> chatNode\n\n\n");
+  console.log(messages, "\n\n");
 
   // Include all messages with system prompt
   const messagesWithSystemPrompt = [systemPrompt, ...messages];
@@ -65,7 +67,6 @@ export async function weatherAgent(state: typeof ChatState.State) {
   const lastMessage = messages[messages.length - 1];
 
   try {
-    // If the last message is a tool call, execute it
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
@@ -76,7 +77,6 @@ export async function weatherAgent(state: typeof ChatState.State) {
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_weather") {
-        // Parse the args properly
         let args: Record<string, unknown>;
         try {
           args =
@@ -93,9 +93,11 @@ export async function weatherAgent(state: typeof ChatState.State) {
             next: "end",
           };
         }
-
         const weatherResult = await fetchWeather.invoke(args);
-
+        const toolMessage = new ToolMessage({
+          tool_call_id: toolCall.id,
+          content: weatherResult,
+        });
         const response = await model.invoke([
           weatherSystemPrompt,
           new HumanMessage(
@@ -104,13 +106,12 @@ export async function weatherAgent(state: typeof ChatState.State) {
         ]);
 
         return {
-          messages: [response],
+          messages: [toolMessage, response],
           next: "end",
         };
       }
     }
 
-    // Fallback: try to extract location and get weather
     const response = await model.invoke([weatherSystemPrompt, lastMessage], {
       tools: [fetchWeather],
     });
@@ -133,10 +134,11 @@ export async function weatherAgent(state: typeof ChatState.State) {
 
 export async function newsAgent(state: typeof ChatState.State) {
   const { messages } = state;
+  console.log("==================================> newsAgent\n\n\n");
+  console.log(messages, "\n\n");
   const lastMessage = messages[messages.length - 1];
 
   try {
-    // If the last message is a tool call, execute it
     const lastMessageWithTools = lastMessage as {
       tool_calls?: Array<{ name: string; args: string }>;
     };
@@ -147,7 +149,6 @@ export async function newsAgent(state: typeof ChatState.State) {
     ) {
       const toolCall = lastMessageWithTools.tool_calls[0];
       if (toolCall.name === "fetch_news") {
-        // Parse the args properly
         let args: Record<string, unknown>;
         try {
           args =
@@ -166,6 +167,10 @@ export async function newsAgent(state: typeof ChatState.State) {
         }
 
         const newsResult = await fetchNews.invoke(args);
+        const toolMessage = new ToolMessage({
+          tool_call_id: toolCall.id,
+          content: newsResult,
+        });
 
         const response = await model.invoke([
           newsSystemPrompt,
@@ -175,7 +180,7 @@ export async function newsAgent(state: typeof ChatState.State) {
         ]);
 
         return {
-          messages: [response],
+          messages: [toolMessage, response],
           next: "end",
         };
       }
