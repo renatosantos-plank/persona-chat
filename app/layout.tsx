@@ -9,8 +9,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Bat Agent",
-  description: "i have no idea",
+  title: "BatBot - Ozzy Osbourne AI Assistant",
+  description:
+    "Chat with BatBot, your Ozzy Osbourne AI assistant with weather and news capabilities",
 };
 
 const geistSans = Geist({
@@ -29,7 +30,7 @@ export default function RootLayout({
       <body className={`${geistSans.className} antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
