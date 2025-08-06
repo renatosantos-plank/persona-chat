@@ -1,4 +1,4 @@
-export function TypingIndicator() {
+export function TypingIndicator({ agent }: { agent: string }) {
   return (
     <div className="flex gap-3 justify-start">
       <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-red-600 rounded-full flex items-center justify-center">
@@ -20,7 +20,7 @@ export function TypingIndicator() {
               style={{ animationDelay: "300ms" }}
             ></div>
           </div>
-          <span className="text-sm text-gray-400">BatBot is thinking...</span>
+          <span className="text-sm text-gray-400">{agent} is thinking...</span>
         </div>
       </div>
     </div>

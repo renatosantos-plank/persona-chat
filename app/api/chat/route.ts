@@ -52,10 +52,20 @@ export async function POST(req: NextRequest) {
     },
     execute: async (dataStream: DataStreamWriter) => {
       try {
+        let currentNode: string | null = null;
         for await (const [message, _metadata] of stream) {
           if (isAIMessageChunk(message) && !(message instanceof AIMessage)) {
-            // const capitalizedNode = _metadata.langgraph_node.charAt()
-            dataStream.write(`${message.content}`);
+            console.log("---->", _metadata);
+            const nodeName =
+              _metadata.langgraph_node.charAt(0).toUpperCase() +
+              _metadata.langgraph_node.slice(1);
+
+            if (nodeName && nodeName !== currentNode) {
+              currentNode = nodeName;
+              const agentData = { agent: currentNode };
+              dataStream.writeMessageAnnotation(agentData);
+            }
+            dataStream.write(`0:${JSON.stringify(message.content)}\n`);
           } else {
             console.log("---->", message.getType());
           }
