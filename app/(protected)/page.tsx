@@ -1,180 +1,146 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { useEffect, useRef, useState } from "react";
+import { Send, User } from "lucide-react";
+import { AgentStatus } from "@/components/agent-status";
+import { TypingIndicator } from "@/components/typing-indicator";
+import { WelcomeMessage } from "@/components/welcome-message";
 import { Navbar } from "@/components/navbar";
-import { v4 } from "uuid";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [threadId, setThreadId] = useState<string | null>(null);
+  const { messages, input, status, error, handleInputChange, handleSubmit } =
+    useChat({
+      streamProtocol: "text",
+      api: "/api/chat",
+    });
 
-  useEffect(() => {
-    const savedThreadId = localStorage.getItem("chat-thread-id");
-    if (savedThreadId) {
-      setThreadId(savedThreadId);
-    } else {
-      const newThreadId = v4();
-      setThreadId(newThreadId);
-      localStorage.setItem("chat-thread-id", newThreadId);
-    }
-  }, []);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isTyping, setIsTyping] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Math.random().toString(),
-      role: "user",
-      content: input,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          threadId: threadId,
-        }),
-      });
-
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error:", response.status, errorText);
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
-      }
-
-      // Check if response has content
-      const responseText = await response.text();
-      if (!responseText) {
-        throw new Error("Empty response from API");
-      }
-
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("Failed to parse JSON:", responseText);
-        throw new Error("Invalid JSON response from API");
-      }
-
-      // Only add the new AI message(s) to the conversation
-      if (data.messages && data.messages.length > 0) {
-        setMessages((prev) => [...prev, ...data.messages]);
-      }
-
-      // Update thread ID if a new one is returned
-      if (data.threadId && data.threadId !== threadId) {
-        setThreadId(data.threadId);
-        localStorage.setItem("chat-thread-id", data.threadId);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      // Add error message to chat
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          role: "assistant",
-          content:
-            "Bloody hell! Something went wrong, mate. Try again in a bit?",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const startNewConversation = () => {
-    const newThreadId = v4();
-    setThreadId(newThreadId);
-    localStorage.setItem("chat-thread-id", newThreadId);
-    setMessages([]); // Clear the current conversation
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    setIsTyping(status === "streaming");
+  }, [status]);
+
+  const getAgentIcon = (content: string) => {
+    if (
+      content.toLowerCase().includes("weather") ||
+      content.toLowerCase().includes("temperature") ||
+      content.toLowerCase().includes("forecast")
+    ) {
+      return <span className="text-blue-400 text-lg">🦇</span>;
+    }
+    if (
+      content.toLowerCase().includes("news") ||
+      content.toLowerCase().includes("headlines")
+    ) {
+      return <span className="text-red-400 text-lg">🦇</span>;
+    }
+    return <span className="text-purple-400 text-lg">🦇</span>;
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white">
       <Navbar />
 
-      <div className="max-w-4xl mx-auto p-4 font-mono">
-        {/* Header with thread management */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-purple-300">Bat Agent Chat</h1>
-          <button
-            type="button"
-            onClick={startNewConversation}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
-          >
-            New Conversation
-          </button>
+      {/* Chat Container */}
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-black/30 backdrop-blur-sm rounded-2xl border border-purple-500/30 h-[600px] flex flex-col">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
+            {messages.length === 0 && <WelcomeMessage />}
+
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex gap-3 ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {message.role === "assistant" && (
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    {getAgentIcon(
+                      message.parts[0]?.type === "text"
+                        ? message.parts[0].text
+                        : ""
+                    )}
+                  </div>
+                )}
+
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                    message.role === "user"
+                      ? "bg-gradient-to-r from-purple-600 to-red-600 text-white"
+                      : "bg-gray-800/50 border border-purple-500/30 text-gray-100"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap">
+                    {message.parts.map((part, i) => {
+                      switch (part.type) {
+                        case "text":
+                          return (
+                            <div
+                              key={`${message.id}-${i}`}
+                              className="text-sm leading-relaxed"
+                            >
+                              {part.text}
+                            </div>
+                          );
+                      }
+                    })}
+                  </div>
+                </div>
+
+                {message.role === "user" && (
+                  <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-gray-300" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Typing Indicator */}
+            {isTyping && <TypingIndicator />}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="p-6 border-t border-purple-500/30">
+            <form onSubmit={handleSubmit} className="flex gap-3">
+              <input
+                className="flex-1 bg-gray-800/50 border border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent"
+                value={input}
+                onChange={handleInputChange}
+                placeholder="Ask BatBot about weather, news, or just chat..."
+                disabled={isTyping}
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isTyping}
+                className="bg-gradient-to-r from-purple-600 to-red-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Send
+              </button>
+            </form>
+          </div>
         </div>
 
-        {/* Thread ID display (optional, for debugging) */}
-        {threadId && (
-          <div className="text-xs text-gray-500 mb-4">
-            Thread: {threadId.substring(0, 8)}...
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 bg-red-500/20 border border-red-500/30 rounded-xl p-4">
+            <p className="text-red-400 text-sm">Error: {error.message}</p>
           </div>
         )}
-
-        <div className="space-y-4 mb-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`p-4 rounded-lg ${
-                message.role === "user"
-                  ? "bg-gray-800 ml-12"
-                  : "bg-gray-700 mr-12"
-              }`}
-            >
-              <div className="font-semibold mb-1 text-purple-300">
-                {message.role === "user" ? "You" : "Bat Agent"}
-              </div>
-              <div>{message.content}</div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="bg-gray-700 p-4 rounded-lg mr-12">
-              <div className="font-semibold mb-1 text-purple-300">
-                Bat Agent
-              </div>
-              <div>*Mumblin and thinkin...*</div>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            className="flex-1 p-2 bg-gray-900 text-white border border-gray-600 rounded-lg placeholder-gray-500"
-            value={input}
-            placeholder="Summon Bat Agent..."
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:opacity-50 hover:bg-purple-500 transition"
-          >
-            Send
-          </button>
-        </form>
       </div>
     </div>
   );

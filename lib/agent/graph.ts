@@ -8,7 +8,7 @@ import {
 } from "./nodes";
 
 const checkpointer = new MemorySaver();
-const MAX_USER_MESSAGES_STATE_SIZE = 2;
+const MAX_USER_MESSAGES_STATE_SIZE = 6;
 
 function shouldContinue(state: typeof ChatState.State) {
   const messages = state.messages;

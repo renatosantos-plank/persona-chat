@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ai-sdk/langchain':
+        specifier: ^1.0.4
+        version: 1.0.5(zod@4.0.14)
       '@ai-sdk/openai':
         specifier: ^1.3.23
         version: 1.3.23(zod@4.0.14)
@@ -117,6 +120,16 @@ importers:
 
 packages:
 
+  '@ai-sdk/gateway@1.0.3':
+    resolution: {integrity: sha512-QRGz2vH1WR9NvCv8gWocoebAKiXcuqj22mug6i8COeVsp33x5K5cK2DT4TwiQx5SfYbqJbVoBT+UqnHF7A3PHA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  '@ai-sdk/langchain@1.0.5':
+    resolution: {integrity: sha512-ErSjOW+YT0UMUE3DMlW9mzOmH7iD5XpeLTKYAm5CiqLu/11WvtBFRMFwhS/VNbvt/pUyUEim4kBZE9XCBGfsiA==}
+    engines: {node: '>=18'}
+
   '@ai-sdk/openai@1.3.23':
     resolution: {integrity: sha512-86U7rFp8yacUAOE/Jz8WbGcwMCqWvjK33wk5DXkfnAOEn3mx2r7tNSJdjukQFZbAK97VMXGPPHxF+aEARDXRXQ==}
     engines: {node: '>=18'}
@@ -129,8 +142,18 @@ packages:
     peerDependencies:
       zod: ^3.23.8
 
+  '@ai-sdk/provider-utils@3.0.1':
+    resolution: {integrity: sha512-/iP1sKc6UdJgGH98OCly7sWJKv+J9G47PnTjIj40IJMUQKwDrUMyf7zOOfRtPwSuNifYhSoJQ4s1WltI65gJ/g==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
   '@ai-sdk/provider@1.1.3':
     resolution: {integrity: sha512-qZMxYJ0qqX/RfnuIaab+zp8UAeJn/ygXXAffR5I4N0n1IrvA6qBsjc8hXLmBiMV2zoXlifkacF7sEFnYnjBcqg==}
+    engines: {node: '>=18'}
+
+  '@ai-sdk/provider@2.0.0':
+    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
 
   '@ai-sdk/react@1.2.12':
@@ -811,6 +834,9 @@ packages:
   '@rushstack/eslint-patch@1.12.0':
     resolution: {integrity: sha512-5EwMtOqvJMMa3HbmxLlF74e+3/HhwBTMcvt3nqVJgGCozO6hzIPOBlwm8mGVNR9SN2IJpxSnlxczyDjcn7qIyw==}
 
+  '@standard-schema/spec@1.0.0':
+    resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
   '@supabase/auth-js@2.71.1':
     resolution: {integrity: sha512-mMIQHBRc+SKpZFRB2qtupuzulaUhFYupNyxqDj5Jp/LyPvcWvjaJzZzObv6URtL/O6lPxkanASnotGtNpS3H2Q==}
 
@@ -1053,6 +1079,12 @@ packages:
       react:
         optional: true
 
+  ai@5.0.5:
+    resolution: {integrity: sha512-NPQ8Yv4lR7o/1rM+HQ0JT18zKxVFy/DrFDpvxlBQqmemSwsf3FlLNTK0asWXo9YtDAc0BOFL/y4kB56Hffi4yg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
@@ -1211,8 +1243,8 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chalk@5.4.1:
-    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
+  chalk@5.5.0:
+    resolution: {integrity: sha512-1tm8DTaJhPBG3bIkVeZt1iZM9GfSX2lzOeDVZH9R9ffRHpmHvxZ/QhgQH/aDTkswQVt+YHdXAdS/In/30OjCbg==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   chokidar@3.6.0:
@@ -1514,6 +1546,10 @@ packages:
 
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
+
+  eventsource-parser@3.0.3:
+    resolution: {integrity: sha512-nVpZkTMM9rF6AQ9gPJpFsNAMt48wIzB5TQgiTLdHiuO8XEDhUgZEhqKlZWXbIzo9VmJ/HvysHqEaVeD5v9TPvA==}
+    engines: {node: '>=20.0.0'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -2702,6 +2738,18 @@ packages:
 
 snapshots:
 
+  '@ai-sdk/gateway@1.0.3(zod@4.0.14)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.14)
+      zod: 4.0.14
+
+  '@ai-sdk/langchain@1.0.5(zod@4.0.14)':
+    dependencies:
+      ai: 5.0.5(zod@4.0.14)
+    transitivePeerDependencies:
+      - zod
+
   '@ai-sdk/openai@1.3.23(zod@4.0.14)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
@@ -2715,7 +2763,19 @@ snapshots:
       secure-json-parse: 2.7.0
       zod: 4.0.14
 
+  '@ai-sdk/provider-utils@3.0.1(zod@4.0.14)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.3
+      zod: 4.0.14
+      zod-to-json-schema: 3.24.6(zod@4.0.14)
+
   '@ai-sdk/provider@1.1.3':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
 
@@ -3333,6 +3393,8 @@ snapshots:
 
   '@rushstack/eslint-patch@1.12.0': {}
 
+  '@standard-schema/spec@1.0.0': {}
+
   '@supabase/auth-js@2.71.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
@@ -3590,6 +3652,14 @@ snapshots:
     optionalDependencies:
       react: 19.1.1
 
+  ai@5.0.5(zod@4.0.14):
+    dependencies:
+      '@ai-sdk/gateway': 1.0.3(zod@4.0.14)
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.14)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.0.14
+
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -3771,7 +3841,7 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chalk@5.4.1: {}
+  chalk@5.5.0: {}
 
   chokidar@3.6.0:
     dependencies:
@@ -4210,6 +4280,8 @@ snapshots:
 
   eventemitter3@4.0.7: {}
 
+  eventsource-parser@3.0.3: {}
+
   fast-deep-equal@3.1.3: {}
 
   fast-glob@3.3.1:
@@ -4554,7 +4626,7 @@ snapshots:
   jsondiffpatch@0.6.0:
     dependencies:
       '@types/diff-match-patch': 1.0.36
-      chalk: 5.4.1
+      chalk: 5.5.0
       diff-match-patch: 1.0.5
 
   jsonpointer@5.0.1: {}
