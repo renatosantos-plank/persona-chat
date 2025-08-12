@@ -23,6 +23,7 @@ const AgentIcon = ({ agentName }: { agentName?: string }) => {
 
 const threadId = "batbot-123";
 export default function Chat() {
+  const [initialMessages, setInitialMessages] = useState([]);
   const { messages, input, status, error, handleInputChange, handleSubmit } =
     useChat({
       id: threadId,
@@ -30,6 +31,7 @@ export default function Chat() {
       body: {
         threadId,
       },
+      initialMessages,
     });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,16 @@ export default function Chat() {
   };
 
   useEffect(() => {
+    fetch(`/api/history?threadId=${threadId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setInitialMessages(data.messages);
+      });
+  }, []);
+
+  useEffect(() => {
     scrollToBottom();
+    console.log(messages);
   }, [messages]);
 
   const isTyping = status === "streaming";
@@ -85,7 +96,6 @@ export default function Chat() {
                         : "bg-gray-800/50 border border-purple-500/30 text-gray-100"
                     }`}
                   >
-                    {/* Optionally display the agent name above the message */}
                     {agentName && (
                       <div className="text-xs font-bold text-purple-300 mb-1">
                         {agentName} Agent

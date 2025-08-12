@@ -143,8 +143,6 @@ export async function weatherAgent(state: typeof ChatState.State) {
 
 export async function newsAgent(state: typeof ChatState.State) {
   const { messages } = state;
-  console.log("==================================> newsAgent\n\n\n");
-  console.log(messages, "\n\n");
   const lastMessage = messages[messages.length - 1];
 
   try {

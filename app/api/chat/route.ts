@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
         let currentNode: string | null = null;
         for await (const [message, _metadata] of stream) {
           if (isAIMessageChunk(message) && !(message instanceof AIMessage)) {
-            console.log("---->", _metadata);
             const nodeName =
               _metadata.langgraph_node.charAt(0).toUpperCase() +
               _metadata.langgraph_node.slice(1);
