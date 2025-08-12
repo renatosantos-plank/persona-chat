@@ -1,4 +1,4 @@
-import { END, MemorySaver, START, StateGraph } from "@langchain/langgraph";
+import { END, START, StateGraph } from "@langchain/langgraph";
 import ChatState from "./types";
 import {
   chatNode,
@@ -6,8 +6,8 @@ import {
   summarizeConversation,
   weatherAgent,
 } from "./nodes";
+import { getCheckpointer } from "./checkpointer";
 
-const checkpointer = new MemorySaver();
 const MAX_USER_MESSAGES_STATE_SIZE = 6;
 
 function shouldContinue(state: typeof ChatState.State) {
@@ -39,4 +39,7 @@ const workflow = new StateGraph(ChatState)
   .addEdge("weather", END)
   .addEdge("news", END);
 
-export const chatGraph = workflow.compile({ checkpointer });
+export const createChatGraph = async () => {
+  const checkpointer = await getCheckpointer();
+  return workflow.compile({ checkpointer });
+};

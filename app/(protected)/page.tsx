@@ -21,10 +21,15 @@ const AgentIcon = ({ agentName }: { agentName?: string }) => {
   }
 };
 
+const threadId = "batbot-123";
 export default function Chat() {
   const { messages, input, status, error, handleInputChange, handleSubmit } =
     useChat({
+      id: threadId,
       api: "/api/chat",
+      body: {
+        threadId,
+      },
     });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);

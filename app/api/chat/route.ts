@@ -1,30 +1,11 @@
-import { chatGraph } from "@/lib/agent/graph";
 import {
   AIMessage,
   HumanMessage,
   isAIMessageChunk,
 } from "@langchain/core/messages";
-import { NextRequest, NextResponse } from "next/server";
-import {
-  createDataStreamResponse,
-  DataStreamWriter,
-  LangChainAdapter,
-  createUIMessageStreamResponse,
-} from "ai";
-
-const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
-  if (message.getType() === "human") {
-    return { content: message.content, role: "user" };
-  } else if (message.getType() === "ai") {
-    return {
-      content: message.content,
-      role: "assistant",
-      tool_calls: (message as AIMessage).tool_calls,
-    };
-  } else {
-    return { content: message.content, role: message.getType() };
-  }
-};
+import { NextRequest } from "next/server";
+import { createDataStreamResponse, DataStreamWriter } from "ai";
+import { createChatGraph } from "@/lib/agent/graph";
 
 export async function POST(req: NextRequest) {
   const { messages, threadId } = await req.json();
@@ -35,6 +16,8 @@ export async function POST(req: NextRequest) {
   const config = {
     configurable: { thread_id: threadId || Math.random().toString() },
   };
+
+  const chatGraph = await createChatGraph();
 
   const stream = await chatGraph.stream(
     {
