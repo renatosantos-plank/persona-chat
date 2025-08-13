@@ -6,12 +6,27 @@ import {
 import { NextRequest } from "next/server";
 import { createDataStreamResponse, DataStreamWriter } from "ai";
 import { createChatGraph } from "@/lib/agent/graph";
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.SUPABASE_CONNECTION_STRING,
+});
+const titleFrom = (t: string) => t.trim().split(/\r?\n/)[0].slice(0, 60);
 
 export async function POST(req: NextRequest) {
   const { messages, threadId } = await req.json();
 
   const lastMessage = messages[messages.length - 1];
   const newUserMessage = new HumanMessage(lastMessage.content);
+
+  console.log(lastMessage);
+  await pool.query(
+    `
+    insert into public.threads (thread_id, title)
+    values ($1, $2)
+    on conflict (thread_id) do nothing`,
+    [threadId, titleFrom(lastMessage.content) || "New chat"]
+  );
 
   const config = {
     configurable: { thread_id: threadId || Math.random().toString() },
