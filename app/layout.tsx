@@ -9,7 +9,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "BatBot - Ozzy Osbourne AI Assistant",
+  title: "BAT Answers Totally",
   description:
     "Chat with BatBot, your Ozzy Osbourne AI assistant with weather and news capabilities",
 };

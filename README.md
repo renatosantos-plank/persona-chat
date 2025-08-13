@@ -1,105 +1,291 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🦇 BAT — BAT Answers Totally
+From weather to wild banter, it’s got you covered.
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+A Next.js-based chat application featuring a multi-agent AI system with personality-driven interactions. Built with LangGraph, Supabase, and OpenAI, this app provides an engaging chat experience with specialized agents for different types of queries.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+![Persona Chat Demo](/public/chat.png)
 
-## Features
+## 🚀 Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### Core Features
+- **Multi-Agent AI System**: Intelligent routing between specialized agents
+- **Personality-Driven Chat**: Ozzy Osbourne-inspired personality across all agents
+- **Real-time Chat Interface**: Stream-based messaging with typing indicators
+- **Thread Management**: Persistent conversation threads with history
+- **Authentication**: Secure user authentication with Supabase
+- **Responsive Design**: Modern UI with dark theme and purple accents
 
-## Demo
+### Specialized Agents
+- **Chat Agent**: Main coordinator for general conversation and routing
+- **Weather Agent**: Real-time weather information from OpenWeather API
+- **News Agent**: Latest headlines and news from NewsAPI
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### Technical Features
+- **LangGraph Integration**: Advanced workflow orchestration
+- **Streaming Responses**: Real-time message streaming
+- **Database Persistence**: PostgreSQL with Supabase
+- **TypeScript**: Full type safety throughout the application
+- **Modern UI**: Built with Tailwind CSS and shadcn/ui components
 
-## Deploy to Vercel
+## 🛠️ Tech Stack
 
-Vercel deployment will guide you through creating a Supabase account and project.
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **AI/ML**: LangGraph, LangChain, OpenAI
+- **Database**: PostgreSQL (Supabase)
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Deployment**: Vercel-ready
+- **Code Quality**: Biome (linting & formatting)
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## 📋 Prerequisites
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+Before you begin, ensure you have the following:
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+- Node.js 18+ and npm/pnpm/yarn
+- A Supabase account and project
+- OpenAI API key
+- OpenWeather API key (for weather features)
+- NewsAPI key (for news features)
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+## 🚀 Quick Start
 
-## Clone and run locally
+### 1. Clone the Repository
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+```bash
+git clone <your-repo-url>
+cd persona-chat
+```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### 2. Install Dependencies
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+```bash
+pnpm install
+```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### 3. Environment Setup
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+Create a `.env.local` file in the project root:
 
-3. Use `cd` to change into the app's directory
+```bash
+# OpenAI API Key (required)
+OPENAI_API_KEY=your_openai_api_key_here
 
-   ```bash
-   cd with-supabase-app
-   ```
+# OpenWeather API Key (required for weather functionality)
+OPENWEATHER_API_KEY=your_openweather_api_key_here
 
-4. Rename `.env.example` to `.env.local` and update the following:
+# NewsAPI Key (required for news functionality)
+NEWSAPI_API_KEY=your_newsapi_key_here
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+# Supabase Configuration (required)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+SUPABASE_CONNECTION_STRING=your_supabase_connection_string_here
+```
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### 4. Database Setup
 
-5. You can now run the Next.js local development server:
+Run the Supabase migrations to set up the database schema:
 
-   ```bash
-   npm run dev
-   ```
+```bash
+# If using Supabase CLI
+supabase db push
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+# Or manually run the SQL files in supabase/migrations/
+```
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+### 5. Start Development Server
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+```bash
+pnpm dev
+```
 
-## Feedback and issues
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+## 🔧 API Key Setup
 
-## More Supabase examples
+### OpenAI API
+1. Visit [OpenAI Platform](https://platform.openai.com/)
+2. Create an account and get your API key
+3. Add it to your `.env.local` file
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### OpenWeather API
+1. Go to [OpenWeather API](https://openweathermap.org/api)
+2. Sign up for a free account
+3. Get your API key from the dashboard
+4. Add it to your `.env.local` file
+
+### NewsAPI
+1. Visit [NewsAPI](https://newsapi.org/)
+2. Sign up for a free account
+3. Get your API key from the dashboard
+4. Add it to your `.env.local` file
+
+### Supabase Setup
+1. Create a new project at [Supabase](https://supabase.com/)
+2. Get your project URL and API keys from Settings > API
+3. Add them to your `.env.local` file
+
+## 🎯 Usage Examples
+
+### Weather Queries
+```
+User: "What's the weather in London?"
+→ Chat Agent routes to Weather Agent
+→ Returns: "Right, mate! Here's the weather in London, GB:
+  • Temperature: 15°C (feels like 13°C)
+  • Conditions: light rain
+  • Humidity: 85%
+  Bloody weather, innit?"
+```
+
+### News Queries
+```
+User: "What's the latest news?"
+→ Chat Agent routes to News Agent
+→ Returns: "Right then, here's what's happening in the world, mate:
+  1. [Headline 1]
+  2. [Headline 2]
+  3. [Headline 3]
+  Bloody interesting times we're living in, innit?"
+```
+
+### General Conversation
+```
+User: "Hello, how are you?"
+→ Chat Agent responds directly
+→ Returns: "Bloody hell, mate! I'm doing alright, innit? Just here to help you with whatever you need..."
+```
+
+## 🏗️ Project Structure
+
+```
+persona-chat/
+├── app/                    # Next.js app directory
+│   ├── (protected)/       # Protected routes (chat interface)
+│   ├── (public)/          # Public routes (auth pages)
+│   └── api/               # API routes
+├── components/            # React components
+│   └── ui/               # shadcn/ui components
+├── lib/                  # Utility libraries
+│   ├── agent/           # Multi-agent system
+│   ├── supabase/        # Supabase configuration
+│   └── utils/           # Helper utilities
+├── supabase/            # Database migrations
+└── public/              # Static assets
+```
+
+## 🔄 Multi-Agent Architecture
+
+The application uses a sophisticated multi-agent system built with LangGraph:
+
+### Agent Routing Logic
+- **Weather Queries**: Automatically routed to Weather Agent
+- **News Queries**: Automatically routed to News Agent  
+- **General Queries**: Handled by Chat Agent
+
+### Flow Diagram
+```
+User Input → Chat Agent (Router)
+    ↓
+[Analyze Intent]
+    ↓
+Weather Query? → Weather Agent → OpenWeather API
+    ↓
+News Query? → News Agent → NewsAPI
+    ↓
+General Query? → Chat Agent (Direct Response)
+```
+
+## 🎭 Personality System
+
+All agents maintain a consistent personality inspired by Ozzy Osbourne:
+- Uses British slang and rockstar phrases
+- Maintains chaotic but endearing personality
+- Consistent across all specialized agents
+- Error messages also follow the personality
+
+## 🚀 Deployment
+
+### Deploy to Vercel
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=your-repo-url)
+
+### Environment Variables for Production
+
+Ensure all environment variables are set in your production environment:
+- `OPENAI_API_KEY`
+- `OPENWEATHER_API_KEY`
+- `NEWSAPI_API_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_CONNECTION_STRING`
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run format       # Format code with Biome
+npm run lint         # Lint code with Biome
+npm run check        # Run all Biome checks
+```
+
+### Code Quality
+
+The project uses Biome for code formatting and linting:
+- Automatic code formatting
+- TypeScript linting
+- Import sorting
+- Consistent code style
+
+## 🔧 Customization
+
+### Adding New Agents
+
+1. Create a new tool in `lib/agent/tools.ts`
+2. Add a new agent node in `lib/agent/nodes.ts`
+3. Update the graph in `lib/agent/graph.ts`
+4. Add routing logic in the chat node
+
+### Modifying Personality
+
+Edit the system prompts in `lib/agent/model.ts` and the specialized prompts in `lib/agent/nodes.ts`.
+
+### Adding New APIs
+
+Follow the pattern in `lib/agent/tools.ts` for creating new API integrations.
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Key Errors**: Ensure all environment variables are set correctly
+2. **Tool Call Errors**: Check that tool schemas match the expected input format
+3. **Routing Issues**: Verify the routing logic in the chat node function
+4. **Database Connection**: Ensure Supabase connection string is correct
+
+
+
+## 📈 Future Enhancements
+
+Potential improvements:
+- Implement context sharing
+- Voice input/output capabilities
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
