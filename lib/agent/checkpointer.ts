@@ -3,7 +3,8 @@ import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 let checkpointerInstance: PostgresSaver | null = null;
 
 export const createCheckpointer = async () => {
-	const connectionString = process.env.SUPABASE_CONNECTION_STRING!;
+	// Use the direct connection string from Supabase
+	const connectionString = process.env.SUPABASE_DIRECT_URL || process.env.SUPABASE_CONNECTION_STRING!;
 	const checkpointer = PostgresSaver.fromConnString(connectionString);
 
 	await checkpointer.setup();

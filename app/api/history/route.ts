@@ -1,12 +1,9 @@
 import type { BaseMessage } from "@langchain/core/messages";
 import { type NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
 import { checkThreadExists, getCheckpointer } from "@/lib/agent/checkpointer";
+import { createClient } from "@/lib/supabase/server";
 import { deserializeMessagesToAISDK } from "@/lib/utils/message-mapper";
 
-const pool = new Pool({
-	connectionString: process.env.SUPABASE_CONNECTION_STRING,
-});
 const checkpointer = await getCheckpointer();
 
 export async function GET(req: NextRequest) {
@@ -26,10 +23,8 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json({ messages }, { status: 200 });
 }
 
-
-
 export async function DELETE(req: NextRequest) {
-	const client = await pool.connect()
+	const supabase = await createClient();
 
 	try {
 		const searchParams = req.nextUrl.searchParams
@@ -41,12 +36,8 @@ export async function DELETE(req: NextRequest) {
 			)
 		}
 
-		await client.query("begin");
-    await client.query("delete from public.checkpoint_writes where thread_id = $1", [threadId]);
-    await client.query("delete from public.checkpoint_blobs  where thread_id = $1", [threadId]);
-    await client.query("delete from public.checkpoints       where thread_id = $1", [threadId]);
-    await client.query("delete from public.threads           where thread_id = $1", [threadId]);
-    await client.query("commit");
+		// Use Supabase client instead of direct PostgreSQL queries
+		await supabase.rpc('clear_thread_history', { thread_id: threadId });
 		
 		return NextResponse.json({message: "Thread history cleared successfully"}, {status: 200})
 	} catch(error) {
@@ -56,7 +47,5 @@ export async function DELETE(req: NextRequest) {
 		}, {
 			status: 500
 		})
-	} finally {
-
 	}
 }
