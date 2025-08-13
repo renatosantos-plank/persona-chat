@@ -17,10 +17,17 @@ const AgentIcon = ({ agentName }: { agentName?: string }) => {
       return <CloudRain className="h-4 w-4 text-cyan-300" />;
     case "News":
       return <Newspaper className="h-4 w-4 text-amber-300" />;
-    case "Chat":
-      return <MessageSquare className="h-4 w-4 text-lime-300" />;
     default:
       return <span className="text-lg text-purple-400">🦇</span>;
+  }
+};
+
+const getAgentName = (message) => {
+  if (message.agentName) {
+    return message.agentName;
+  }
+  if (message.annotations && message.annotations.length > 0) {
+    return message.annotations[message.annotations.length - 1]?.agent;
   }
 };
 
@@ -98,11 +105,9 @@ export default function Chat() {
             {messages.length === 0 && <WelcomeMessage />}
 
             {messages.map((message) => {
-              // Retrieve the agent name from the message's annotations array.
-              // We'll use the last annotation as it represents the final agent.
-              const agentName = (
-                message.annotations?.[message.annotations.length - 1] as any
-              )?.agent;
+              console.log(message);
+              if (!message.role) return;
+              const agentName = getAgentName(message);
 
               return (
                 <div

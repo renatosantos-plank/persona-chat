@@ -114,8 +114,13 @@ export async function weatherAgent(state: typeof ChatState.State) {
 					),
 				]);
 
+				const responseWithAgent = new AIMessage({
+					content: response.content,
+					additional_kwargs: {agent: 'Weather'}
+				})
+
 				return {
-					messages: [toolMessage, response],
+					messages: [toolMessage, responseWithAgent],
 					next: "end",
 				};
 			}
@@ -185,9 +190,15 @@ export async function newsAgent(state: typeof ChatState.State) {
 						`User asked about news. Here's the data: ${newsResult}`,
 					),
 				]);
+				
+				const responseWithAgent = new AIMessage({
+					content: response.content,
+					additional_kwargs: { agent: "News" }
+				})
+
 
 				return {
-					messages: [toolMessage, response],
+					messages: [toolMessage, responseWithAgent],
 					next: "end",
 				};
 			}
