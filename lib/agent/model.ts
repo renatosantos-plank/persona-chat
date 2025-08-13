@@ -56,7 +56,7 @@ Otherwise, continue directly with the user and set next = end
 `);
 
 export const model = new ChatOpenAI({
-  modelName: "gpt-4o-mini",
-  temperature: 0.7,
-  streaming: false, // Disable streaming for LangGraph compatibility
+	modelName: "gpt-4o-mini",
+	temperature: 0.7,
+	streaming: false, // Disable streaming for LangGraph compatibility
 });
