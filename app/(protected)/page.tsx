@@ -38,8 +38,8 @@ const getAgentName = (message: {
 
 export default function Chat() {
   const [initialMessages, setInitialMessages] = useState([]);
-  const [threadId, setThreadId] = useState("");
-  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
+  const [threadId, setThreadId] = useState<string>("");
+  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState<number>(0);
   const { messages, input, status, error, handleInputChange, handleSubmit } =
     useChat({
       id: threadId,

@@ -1,7 +1,6 @@
 import {
 	AIMessage,
 	HumanMessage,
-	isAIMessageChunk,
 } from "@langchain/core/messages";
 import { createDataStreamResponse, type DataStreamWriter } from "ai";
 import type { NextRequest } from "next/server";
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
 			try {
 				let currentNode: string | null = null;
 				for await (const [message, _metadata] of stream) {
-					if (isAIMessageChunk(message) && !(message instanceof AIMessage)) {
+					if (!(message instanceof AIMessage)) {
 						const nodeName =
 							_metadata.langgraph_node.charAt(0).toUpperCase() +
 							_metadata.langgraph_node.slice(1);

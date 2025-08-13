@@ -1,3 +1,4 @@
+import type { BaseMessage } from "@langchain/core/messages";
 import { type NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import { checkThreadExists, getCheckpointer } from "@/lib/agent/checkpointer";
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
 		configurable: { thread_id: threadId },
 	});
 
-	const messages = deserializeMessagesToAISDK(cp?.channel_values?.messages);
+	const messages = deserializeMessagesToAISDK(cp?.channel_values?.messages as BaseMessage[]);
 
 	return NextResponse.json({ messages }, { status: 200 });
 }

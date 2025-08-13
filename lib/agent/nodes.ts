@@ -76,9 +76,7 @@ export async function weatherAgent(state: typeof ChatState.State) {
 	const lastMessage = messages[messages.length - 1];
 
 	try {
-		const lastMessageWithTools = lastMessage as {
-			tool_calls?: Array<{ name: string; args: string }>;
-		};
+		const lastMessageWithTools = lastMessage as AIMessage;
 
 		if (
 			lastMessageWithTools.tool_calls &&
@@ -104,7 +102,7 @@ export async function weatherAgent(state: typeof ChatState.State) {
 				}
 				const weatherResult = await fetchWeather.invoke(args);
 				const toolMessage = new ToolMessage({
-					tool_call_id: toolCall.id,
+					tool_call_id: toolCall.id || "",
 					content: weatherResult,
 				});
 				const response = await model.invoke([
@@ -151,9 +149,7 @@ export async function newsAgent(state: typeof ChatState.State) {
 	const lastMessage = messages[messages.length - 1];
 
 	try {
-		const lastMessageWithTools = lastMessage as {
-			tool_calls?: Array<{ name: string; args: string }>;
-		};
+		const lastMessageWithTools = lastMessage as AIMessage
 
 		if (
 			lastMessageWithTools.tool_calls &&
@@ -180,7 +176,7 @@ export async function newsAgent(state: typeof ChatState.State) {
 
 				const newsResult = await fetchNews.invoke(args);
 				const toolMessage = new ToolMessage({
-					tool_call_id: toolCall.id,
+					tool_call_id: toolCall.id || "",
 					content: newsResult,
 				});
 

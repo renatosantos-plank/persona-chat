@@ -3,7 +3,13 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export function ClearHistoryButton({ threadId, onHistoryCleared }) {
+export function ClearHistoryButton({
+  threadId,
+  onHistoryCleared,
+}: {
+  threadId: string;
+  onHistoryCleared: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const handleClearHistory = async () => {
     if (
