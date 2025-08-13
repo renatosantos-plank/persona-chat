@@ -25,16 +25,20 @@ export function WelcomeMessage() {
           <div className="rounded-lg border border-purple-500/20 bg-gray-800/30 p-3 backdrop-blur-sm">
             <span className="text-purple-300">•</span>
             <span className="ml-2">
-              "What darkness lies in the weather today?"
+              &ldquo;What darkness lies in the weather today?&rdquo;
             </span>
           </div>
           <div className="rounded-lg border border-purple-500/20 bg-gray-800/30 p-3 backdrop-blur-sm">
             <span className="text-purple-300">•</span>
-            <span className="ml-2">"Reveal the chaos in the world's news"</span>
+            <span className="ml-2">
+              &ldquo;Reveal the chaos in the world&apos;s news&rdquo;
+            </span>
           </div>
           <div className="rounded-lg border border-purple-500/20 bg-gray-800/30 p-3 backdrop-blur-sm">
             <span className="text-purple-300">•</span>
-            <span className="ml-2">"Let us converse in the shadows"</span>
+            <span className="ml-2">
+              &ldquo;Let us converse in the shadows&rdquo;
+            </span>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { Clock, MessageSquare, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Clock, Plus } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Thread {
   thread_id: string;
@@ -24,7 +24,7 @@ export function Sidebar({
 }: SidebarProps) {
   const [threads, setThreads] = useState<Thread[]>([]);
 
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     try {
       const response = await fetch("/api/threads");
       const data = await response.json();
@@ -32,11 +32,11 @@ export function Sidebar({
     } catch (error) {
       console.error("Error fetching threads:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchThreads();
-  }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
+  }, [fetchThreads, refreshTrigger]); // Re-fetch when refreshTrigger changes
 
   return (
     <aside className="flex w-72 flex-shrink-0 flex-col overflow-y-auto rounded-2xl border-sabbath-glow bg-sabbath-overlay backdrop-blur-sm">
@@ -57,7 +57,9 @@ export function Sidebar({
       <div className="p-4">
         {threads.length === 0 ? (
           <div className="py-8 text-center">
-            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-purple-400 opacity-60" />
+            <div className="mx-auto mb-4 h-12 w-12 text-purple-400 opacity-60">
+              🦇
+            </div>
             <p className="font-medium text-gray-300 text-sm">
               No conversations yet
             </p>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { CloudRain, MessageSquare, Newspaper, Send, User } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { CloudRain, Newspaper, Send, User } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
 import { ClearHistoryButton } from "@/components/clear-history-button";
 import { Navbar } from "@/components/navbar";
@@ -22,12 +22,17 @@ const AgentIcon = ({ agentName }: { agentName?: string }) => {
   }
 };
 
-const getAgentName = (message) => {
+const getAgentName = (message: {
+  agentName?: string;
+  annotations?: unknown[];
+}) => {
   if (message.agentName) {
     return message.agentName;
   }
   if (message.annotations && message.annotations.length > 0) {
-    return message.annotations[message.annotations.length - 1]?.agent;
+    return (
+      message.annotations[message.annotations.length - 1] as { agent?: string }
+    )?.agent;
   }
 };
 
@@ -50,11 +55,11 @@ export default function Chat() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       const response = await fetch(`/api/history?threadId=${threadId}`);
       const data = await response.json();
@@ -62,7 +67,7 @@ export default function Chat() {
     } catch (error) {
       console.error("Error loading history:", error);
     }
-  };
+  }, [threadId]);
 
   const handleNewThread = () => {
     const newThreadId = v4();
@@ -73,7 +78,7 @@ export default function Chat() {
 
   useEffect(() => {
     loadHistory();
-  }, [threadId]);
+  }, [loadHistory]);
 
   useEffect(() => {
     scrollToBottom();
@@ -88,8 +93,11 @@ export default function Chat() {
   // Determine the current agent for the typing indicator from the last message's annotations
   const lastMessage = messages[messages.length - 1];
   const currentAgent = isTyping
-    ? (lastMessage?.annotations?.[lastMessage.annotations.length - 1] as any)
-        ?.agent
+    ? (
+        lastMessage?.annotations?.[lastMessage.annotations.length - 1] as {
+          agent?: string;
+        }
+      )?.agent
     : undefined;
 
   return (
