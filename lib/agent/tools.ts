@@ -107,7 +107,7 @@ export const fetchNews = tool(
 			}
 
 			const response = await fetch(`${baseUrl}?${params}`);
-			console.log(response);
+
 			if (!response.ok) {
 				throw new Error(`News API error: ${response.status}`);
 			}

@@ -7,7 +7,7 @@ import {
 } from "@langchain/core/messages";
 import { v4 } from "uuid";
 import { model, systemPrompt } from "./model";
-import { fetchWeather, fetchNews } from "./tools";
+import { fetchNews, fetchWeather } from "./tools";
 import type ChatState from "./types";
 
 // Specialized system prompts for each agent
@@ -216,8 +216,6 @@ export async function newsAgent(state: typeof ChatState.State) {
 
 export async function summarizeConversation(state: typeof ChatState.State) {
 	const { summary, messages, next } = state;
-	console.log(next);
-	// console.log("summarize messages: \n", messages, "\n\n");
 
 	let promptSummaryMessage: string;
 
@@ -241,7 +239,6 @@ export async function summarizeConversation(state: typeof ChatState.State) {
 		.slice(0, -2)
 		.map((m) => new RemoveMessage({ id: m.id || "" }));
 
-	// console.log("deleteMessages\n", deleteMessages);
 	return {
 		messages: deleteMessages,
 		summary: response.content,

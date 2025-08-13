@@ -3,10 +3,10 @@ import {
 	HumanMessage,
 	isAIMessageChunk,
 } from "@langchain/core/messages";
-import type { NextRequest } from "next/server";
 import { createDataStreamResponse, type DataStreamWriter } from "ai";
-import { createChatGraph } from "@/lib/agent/graph";
+import type { NextRequest } from "next/server";
 import { Pool } from "pg";
+import { createChatGraph } from "@/lib/agent/graph";
 
 const pool = new Pool({
 	connectionString: process.env.SUPABASE_CONNECTION_STRING,
@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
 	const lastMessage = messages[messages.length - 1];
 	const newUserMessage = new HumanMessage(lastMessage.content);
 
-	console.log(lastMessage);
 	await pool.query(
 		`
     insert into public.threads (thread_id, title)
@@ -63,9 +62,7 @@ export async function POST(req: NextRequest) {
 							dataStream.writeMessageAnnotation(agentData);
 						}
 						dataStream.write(`0:${JSON.stringify(message.content)}\n`);
-					} else {
-						console.log("---->", message.getType());
-					}
+					} 
 				}
 			} catch (error) {
 				console.error("Streaming error: ", error);
