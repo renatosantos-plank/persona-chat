@@ -1,7 +1,7 @@
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { AIMessage, type BaseMessage, HumanMessage } from "@langchain/core/messages";
 
 export function deserializeMessagesToAISDK(langggraphMessages) {
-	return langggraphMessages.map((m: any) => {
+	return langggraphMessages.map((m: BaseMessage) => {
 		let role = null;
 		if (m instanceof HumanMessage) {
 			role = "user";
