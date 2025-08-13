@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     on conflict (thread_id) do nothing`,
 		[threadId, titleFrom(lastMessage.content) || "New chat"],
 	);
-
+	
 	const config = {
 		configurable: { thread_id: threadId || Math.random().toString() },
 	};

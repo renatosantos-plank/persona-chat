@@ -33,7 +33,8 @@ const getAgentName = (message) => {
 
 export default function Chat() {
   const [initialMessages, setInitialMessages] = useState([]);
-  const [threadId, setThreadId] = useState("batbot-123");
+  const [threadId, setThreadId] = useState("");
+  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
   const { messages, input, status, error, handleInputChange, handleSubmit } =
     useChat({
       id: threadId,
@@ -42,6 +43,9 @@ export default function Chat() {
         threadId,
       },
       initialMessages,
+      onFinish: () => {
+        setSidebarRefreshTrigger((prev) => prev + 1);
+      },
     });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -58,6 +62,13 @@ export default function Chat() {
     } catch (error) {
       console.error("Error loading history:", error);
     }
+  };
+
+  const handleNewThread = () => {
+    const newThreadId = v4();
+    setThreadId(newThreadId);
+    setInitialMessages([]);
+    setSidebarRefreshTrigger((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -89,7 +100,8 @@ export default function Chat() {
         <Sidebar
           selectedId={threadId}
           onSelect={setThreadId}
-          onNew={() => setThreadId(v4())}
+          onNew={() => handleNewThread()}
+          refreshTrigger={sidebarRefreshTrigger}
         />
         <div className="flex min-w-0 flex-1 flex-col rounded-2xl border-sabbath-glow bg-sabbath-overlay backdrop-blur-sm">
           {/* header with clear history button */}
