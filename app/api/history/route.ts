@@ -4,8 +4,6 @@ import { checkThreadExists, getCheckpointer } from "@/lib/agent/checkpointer";
 import { createClient } from "@/lib/supabase/server";
 import { deserializeMessagesToAISDK } from "@/lib/utils/message-mapper";
 
-const checkpointer = await getCheckpointer();
-
 export async function GET(req: NextRequest) {
 	const searchParams = req.nextUrl.searchParams;
 	const threadId = searchParams.get("threadId") ?? "";
@@ -14,6 +12,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json({ messages: [] }, { status: 200 });
 	}
 
+	const checkpointer = await getCheckpointer();
 	const cp = await checkpointer.get({
 		configurable: { thread_id: threadId },
 	});
