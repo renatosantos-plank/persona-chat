@@ -1,9 +1,10 @@
 import {
 	AIMessage,
+	AIMessageChunk,
 	HumanMessage,
 } from "@langchain/core/messages";
 import { createDataStreamResponse, type DataStreamWriter } from "ai";
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createChatGraph } from "@/lib/agent/graph";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,22 +14,26 @@ export async function POST(req: NextRequest) {
 	const { messages, threadId } = await req.json();
 	const supabase = await createClient();
 
+	const {data: {user}, error: userError} = await supabase.auth.getUser();
+	if (userError || !user) { return NextResponse.json({error: 'Unauthorized'}, {status: 401})}
+
+	const userId = user.id
 	const lastMessage = messages[messages.length - 1];
 	const newUserMessage = new HumanMessage(lastMessage.content);
 
-	// Replace direct PostgreSQL query with Supabase client
 	await supabase
 		.from('threads')
 		.upsert(
 			{ 
 				thread_id: threadId, 
+				user_id: userId,
 				title: titleFrom(lastMessage.content) || "New chat" 
 			},
 			{ onConflict: 'thread_id' }
 		);
 	
 	const config = {
-		configurable: { thread_id: threadId || Math.random().toString() },
+	configurable: { thread_id: threadId },
 	};
 
 	const chatGraph = await createChatGraph();
@@ -51,7 +56,7 @@ export async function POST(req: NextRequest) {
 			try {
 				let currentNode: string | null = null;
 				for await (const [message, _metadata] of stream) {
-					if (!(message instanceof AIMessage)) {
+					if (!(message instanceof AIMessage) && message instanceof AIMessageChunk) {
 						const nodeName =
 							_metadata.langgraph_node.charAt(0).toUpperCase() +
 							_metadata.langgraph_node.slice(1);
