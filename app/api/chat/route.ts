@@ -21,16 +21,26 @@ export async function POST(req: NextRequest) {
 	const lastMessage = messages[messages.length - 1];
 	const newUserMessage = new HumanMessage(lastMessage.content);
 
-	await supabase
+	const { data: existingThread } = await supabase
 		.from('threads')
-		.upsert(
-			{ 
-				thread_id: threadId, 
+		.select('thread_id')
+		.eq('thread_id', threadId)
+		.single();
+
+	if (existingThread) {
+		await supabase
+			.from('threads')
+			.update({ updated_at: new Date().toISOString() })
+			.eq('thread_id', threadId);
+	} else {
+		await supabase
+			.from('threads')
+			.insert({
+				thread_id: threadId,
 				user_id: userId,
-				title: titleFrom(lastMessage.content) || "New chat" 
-			},
-			{ onConflict: 'thread_id' }
-		);
+				title: titleFrom(lastMessage.content) || "New chat"
+			});
+	}
 	
 	const config = {
 	configurable: { thread_id: threadId },
