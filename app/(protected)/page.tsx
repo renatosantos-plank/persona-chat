@@ -125,7 +125,6 @@ export default function Chat() {
             {messages.length === 0 && <WelcomeMessage />}
 
             {messages.map((message) => {
-              console.log(message);
               if (!message.role) return;
               const agentName = getAgentName(message);
 
