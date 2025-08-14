@@ -22,7 +22,11 @@ export const getCheckpointer = async () => {
 	return checkpointerInstance;
 };
 
-export const checkThreadExists = async (threadId: string) => {
+export const createUserThreadId = (userId: string, threadId: string) => {
+	return `${userId}:${threadId}`
+}
+
+export const checkThreadExists = async ( threadId: string) => {
 	const checkpointer = await getCheckpointer();
 	const existing = await checkpointer.get({
 		configurable: { thread_id: threadId },
